@@ -427,7 +427,7 @@ resolve_refs_html = function(content, global = FALSE) {
 
 is_img_line = function(x) grepl('^<img src=".* alt="', x)
 
-ref_to_number = function(ref, ref_table, backslash) {
+ref_to_number = function(ref, ref_table, backslash, ref_to_chapter = NULL) {
   if (length(ref) == 0) return(ref)
   ref = gsub(if (backslash) '^\\\\@ref\\(|\\)$' else '^@ref\\(|\\)$', '', ref)
   num = ref_table[ref]
@@ -440,7 +440,18 @@ ref_to_number = function(ref, ref_table, backslash) {
   # equation references should include paratheses
   i = grepl('^eq:', ref)
   num[i] = paste0('(', num[i], ')')
-  res = sprintf('<a href="#%s">%s</a>', ref, num)
+  if (is.null(ref_to_chapter)) {
+    res = sprintf('<a href="#%s">%s</a>', ref, num)
+  } else {
+    chapters <- ref_to_chapter[ref]
+    new_ref <- sprintf("ch%03d.xhtml#%s", chapters, ref)
+    res = sprintf('<a href="%s">%s</a>', new_ref, num)
+
+    # HACK: in epub, no figure links
+    is_figure <- grepl("^fig:", ref)
+    res[is_figure] <- as.character(num[is_figure])
+  }
+
   # do not add relative links to equation numbers in ePub/Word (not implemented)
   ifelse(backslash & i, num, res)
 }

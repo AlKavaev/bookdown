@@ -113,10 +113,13 @@ resolve_refs_md = function(content, ref_table) {
   # replace (\#eq:label) with equation numbers
   content = add_eq_numbers(content, ids, ref_table)
 
+  ref_to_chapter <- as.integer(gsub("^(\\d+).*", "\\1", ref_table)) + 1
+  names(ref_to_chapter) <- names(ref_table)
+
   # look for \@ref(label) and resolve to actual figure/table/section numbers
   m = gregexpr('(?<!`)\\\\@ref\\(([-:[:alnum:]]+)\\)', content, perl = TRUE)
   refs = regmatches(content, m)
-  regmatches(content, m) = lapply(refs, ref_to_number, ref_table, TRUE)
+  regmatches(content, m) = lapply(refs, ref_to_number, ref_table, TRUE, ref_to_chapter = ref_to_chapter)
   content
 }
 

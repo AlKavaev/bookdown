@@ -256,3 +256,12 @@ kindlegen = function(epub, exec = Sys.which('kindlegen')) {
   if (!file.exists(mobi)) stop('Failed to convert epub to mobi')
   mobi
 }
+
+render_equation <- function(formula) {
+  # approach is borrowed from
+  formula_file <- system.file("resources", "mathimg", "formula.tex", package = "bookdown")
+
+  cmd <- sprintf('pdflatex "\\def\\formula{%s}\\input{%s}"',
+                 formula, formula_file)
+  system(cmd, ignore.stdout = TRUE)
+}
